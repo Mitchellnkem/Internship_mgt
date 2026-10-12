@@ -171,3 +171,44 @@ CREATE TABLE IF NOT EXISTS `admin_audit_logs` (
   KEY `admin_audit_actor_index` (`actor_user_id`,`created_at`),
   CONSTRAINT `admin_audit_actor_fk` FOREIGN KEY (`actor_user_id`) REFERENCES `users` (`id`) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Short-lived response cache prevents each page view from consuming provider quota.
+CREATE TABLE IF NOT EXISTS `external_opportunity_search_cache` (
+  `cache_key` char(64) NOT NULL,
+  `response_json` mediumtext NOT NULL,
+  `fetched_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `expires_at` datetime NOT NULL,
+  PRIMARY KEY (`cache_key`),
+  KEY `external_search_cache_expiry_index` (`expires_at`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS `external_search_api_rate_limits` (
+  `client_hash` char(64) NOT NULL,
+  `window_started_at` datetime NOT NULL,
+  `request_count` smallint(5) unsigned NOT NULL DEFAULT 0,
+  PRIMARY KEY (`client_hash`),
+  KEY `external_rate_window_index` (`window_started_at`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Store only Matrix account/room references here; Matrix owns encrypted events and device keys.
+CREATE TABLE IF NOT EXISTS `matrix_user_links` (
+  `user_id` int(10) unsigned NOT NULL,
+  `matrix_user_id` varchar(255) NOT NULL,
+  `verified_at` datetime DEFAULT NULL,
+  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`user_id`),
+  UNIQUE KEY `matrix_user_id_unique` (`matrix_user_id`),
+  CONSTRAINT `matrix_user_links_user_fk` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS `matrix_conversations` (
+  `application_id` int(10) unsigned NOT NULL,
+  `matrix_room_id` varchar(255) NOT NULL,
+  `created_by_user_id` int(10) unsigned NOT NULL,
+  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`application_id`),
+  UNIQUE KEY `matrix_room_id_unique` (`matrix_room_id`),
+  KEY `matrix_conversation_created_index` (`created_at`),
+  CONSTRAINT `matrix_conversations_application_fk` FOREIGN KEY (`application_id`) REFERENCES `applications` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `matrix_conversations_creator_fk` FOREIGN KEY (`created_by_user_id`) REFERENCES `users` (`id`) ON DELETE RESTRICT
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

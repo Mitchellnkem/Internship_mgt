@@ -26,3 +26,13 @@ The repository contains many zero-byte files, not just missing styles. The emplo
 5. Add production deployment controls: HTTPS, least-privilege database user, backups, error logging/monitoring, and a supported PHP/MySQL version.
 
 The profile, token, notification, status-history, and audit tables provide storage; their corresponding user-facing workflows and write paths still need implementation. The CSRF helpers are infrastructure for the form handlers; each mutating form still needs to include `csrf_field()` and reject POST requests where `csrf_is_valid()` is false. No full application test run was performed.
+
+## External opportunity search
+
+The internships page now includes a same-origin JSON search endpoint at `api/opportunities.php`. It uses Jooble server-side, so its API key is never sent to the browser. Search defaults to Ghana and also offers Africa and International scopes. External listings are labeled and link to the original posting; they are not stored as BIT listings and cannot be applied to through the local application workflow. Responses are cached in `external_opportunity_search_cache` for two hours, requests are limited to five pages of 12 items, and cache misses are limited to ten per client per hour. A WebSocket is unnecessary for user-triggered search; ordinary HTTP requests are simpler for this feature.
+
+To enable live results, request a Jooble API key for the intended market and set `JOOBLE_API_KEY` in the Apache/PHP environment. Do not put the key in JavaScript or commit it. Then run `php scripts/setup_internship_schema.php` to create the cache table. Until the key is configured, local internship listings continue to work and the external section explains that live search is disconnected. Jooble documents a 500-request lifetime limit for its free API plan, so the cache is enabled from the start; confirm current market access, limits, and display terms with Jooble before launch.
+
+## Secure messaging
+
+See [SECURE_MESSAGING_ARCHITECTURE.md](SECURE_MESSAGING_ARCHITECTURE.md) for the self-hosted Matrix end-to-end messaging design. Server endpoints now verify Matrix account ownership and ensure linked rooms use Matrix encryption and have only the student/employer attached to that application. The schema stores account/room references only. Message bodies and cryptographic keys remain on clients/Matrix. The project still needs a permanent homeserver domain, TLS endpoint, JavaScript SDK build, Matrix account enrollment, and key recovery/verification UI before users can message. Do not treat ordinary PHP/MySQL storage encryption or HTTPS alone as end-to-end encryption.
