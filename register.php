@@ -8,6 +8,9 @@ if(is_logged_in()){
 $errors = array();
 
 if($_SERVER['REQUEST_METHOD'] === 'POST'){
+    if (!csrf_is_valid()) {
+        $errors[] = 'Your session expired. Refresh the page and try again.';
+    }
     $full_name = isset($_POST['full_name']) ? trim($_POST['full_name']) : '';
     $email = isset($_POST['email']) ? trim($_POST['email']) : '';
     $password = isset($_POST['password']) ? $_POST['password'] : '';
@@ -24,8 +27,8 @@ if($_SERVER['REQUEST_METHOD'] === 'POST'){
     }
     if(empty($password)){
         $errors[] = 'Password is required';
-    } elseif(strlen($password) < 6){
-        $errors[] = 'Password must be at least 6 characters';
+    } elseif(strlen($password) < 12){
+        $errors[] = 'Password must be at least 12 characters';
     }
     if($password !== $password_confirm){
         $errors[] = 'Passwords do not match';
@@ -35,15 +38,18 @@ if($_SERVER['REQUEST_METHOD'] === 'POST'){
     }
     
     if(empty($errors)){
-        $email_escaped = $db->real_escape_string($email);
-        $check = $db->query("SELECT id FROM users WHERE email = '{$email_escaped}' LIMIT 1");
+        $check_stmt = $db->prepare('SELECT id FROM users WHERE email = ? LIMIT 1');
+        $check_stmt->bind_param('s', $email);
+        $check_stmt->execute();
+        $check = $check_stmt->get_result();
         if($check && $check->num_rows > 0){
             $errors[] = 'Email already registered';
         } else {
             $hashed_password = password_hash($password, PASSWORD_DEFAULT);
-            $full_name_escaped = $db->real_escape_string($full_name);
             $permissions = ($user_type === 'employer') ? 'employer,post_jobs' : 'student,apply_jobs';
-            $db->query("INSERT INTO users (full_name, email, password, user_type, permissions, created_at) VALUES ('{$full_name_escaped}', '{$email_escaped}', '{$hashed_password}', '{$user_type}', '{$permissions}', NOW())");
+            $insert = $db->prepare('INSERT INTO users (full_name, email, password, user_type, permissions, created_at) VALUES (?, ?, ?, ?, ?, NOW())');
+            $insert->bind_param('sssss', $full_name, $email, $hashed_password, $user_type, $permissions);
+            $insert->execute();
             
             if($db->affected_rows > 0){
                 flash('success_flash', 'Registration successful! Please login.');
@@ -51,7 +57,9 @@ if($_SERVER['REQUEST_METHOD'] === 'POST'){
             } else {
                 $errors[] = 'Registration failed. Please try again.';
             }
+            $insert->close();
         }
+        $check_stmt->close();
     }
 }
 ?>
@@ -67,6 +75,7 @@ if($_SERVER['REQUEST_METHOD'] === 'POST'){
                 <?php endif; ?>
                 
                 <form method="POST" action="register.php">
+                    <?= csrf_field() ?>
                     <div class="form-group">
                         <label for="full_name">Full Name</label>
                         <input type="text" class="form-control" id="full_name" name="full_name" 
@@ -90,7 +99,7 @@ if($_SERVER['REQUEST_METHOD'] === 'POST'){
                     <div class="form-group">
                         <label for="password">Password</label>
                         <input type="password" class="form-control" id="password" name="password" required>
-                        <small class="form-text text-muted">Minimum 6 characters</small>
+                        <small class="form-text text-muted">Use at least 12 characters for a stronger account.</small>
                     </div>
                     
                     <div class="form-group">

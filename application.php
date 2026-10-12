@@ -11,6 +11,7 @@ if(!$internship){
 
 $has_applied = false;
 $application = null;
+$can_apply = is_logged_in() && isset($user_data['user_type']) && $user_data['user_type'] === 'student';
 
 if(is_logged_in()){
     $application = get_application($_SESSION['SBUser'], $internship_id);
@@ -19,8 +20,11 @@ if(is_logged_in()){
 
 $errors = array();
 
-if(is_logged_in() && $_SERVER['REQUEST_METHOD'] === 'POST' && !$has_applied){
-    $cover_letter = isset($_POST['cover_letter']) ? sanitize($_POST['cover_letter']) : '';
+if(is_logged_in() && $_SERVER['REQUEST_METHOD'] === 'POST' && !$has_applied && $can_apply){
+    if (!csrf_is_valid()) {
+        $errors[] = 'Your session expired. Refresh the page and try again.';
+    }
+    $cover_letter = isset($_POST['cover_letter']) ? trim($_POST['cover_letter']) : '';
     
     if(empty($cover_letter)){
         $errors[] = 'Cover letter is required';
@@ -85,6 +89,8 @@ if(is_logged_in() && $_SERVER['REQUEST_METHOD'] === 'POST' && !$has_applied){
                         <p><strong>Application Status:</strong> <?= ucfirst($application['status']) ?></p>
                         <p><strong>Applied On:</strong> <?= pretty_date($application['application_date']) ?></p>
                     </div>
+                <?php elseif(!$can_apply): ?>
+                    <div class="alert alert-info"><p>Student accounts can apply to internships. Sign in or create a student account to continue.</p></div>
                 <?php else: ?>
                     <h5>Apply for this Internship</h5>
                     <hr>
@@ -94,6 +100,7 @@ if(is_logged_in() && $_SERVER['REQUEST_METHOD'] === 'POST' && !$has_applied){
                     <?php endif; ?>
                     
                     <form method="POST" action="application.php?id=<?= $internship_id ?>">
+                        <?= csrf_field() ?>
                         <div class="form-group">
                             <label for="cover_letter">Cover Letter</label>
                             <textarea class="form-control" id="cover_letter" name="cover_letter" rows="5" required></textarea>

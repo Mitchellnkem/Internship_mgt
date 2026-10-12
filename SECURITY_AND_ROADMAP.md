@@ -1,4 +1,4 @@
-# InternshipHub overhaul notes
+# BIT-InternshipHub overhaul notes
 
 ## Changes in this first pass
 
@@ -8,6 +8,7 @@
 - Set the MySQL connection to `utf8mb4`, stopped returning raw database errors to visitors, and moved the login timestamp update to a prepared statement.
 - Added reusable CSRF token helpers for the form handlers as they are restored.
 - Added a permission-guarded superadmin overview with basic platform metrics. It follows the current `users.permissions` model and does not create a second identity system.
+- Added a CLI-only demo account seeder for student, employer, and superadmin roles. It never resets passwords on existing accounts and is not reachable over HTTP.
 - Database credentials can now be supplied through `INTERNSHIP_DB_USER` and `INTERNSHIP_DB_PASS`.
 
 ## Important findings

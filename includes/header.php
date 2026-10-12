@@ -1,68 +1,56 @@
 <?php
-if(session_status() === PHP_SESSION_NONE){
-    session_start();
-}
 require_once __DIR__ . '/../core/init.php';
+$current_page = basename($_SERVER['PHP_SELF']);
 ?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BIT - InternshipHub</title>
-    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.8.2/css/all.css">
+    <title>BIT-InternshipHub</title>
     <link href="css/bootstrap.min.css" rel="stylesheet">
     <link href="css/mdb.min.css" rel="stylesheet">
     <link href="css/style.css" rel="stylesheet">
+    <link href="css/components.css" rel="stylesheet">
 </head>
 <body>
+    <a class="skip-link" href="#main-content">Skip to content</a>
     <header>
-        <nav class="navbar navbar-expand-lg navbar-dark default-color">
-            <a class="navbar-brand" href="index.php">BIT-InternshipHub</a>
+        <nav class="navbar navbar-expand-lg navbar-light default-color site-navbar" aria-label="Main navigation">
+            <a class="navbar-brand" href="index.php"><span class="brand-mark" aria-hidden="true">B</span><span>BIT-InternshipHub</span></a>
             <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarMain"
                 aria-controls="navbarMain" aria-expanded="false" aria-label="Toggle navigation">
-                <span class="navbar-toggler-icon"></span>
+                <span class="navbar-toggler-icon"><span></span></span>
             </button>
             <div class="collapse navbar-collapse" id="navbarMain">
                 <ul class="navbar-nav mr-auto">
                     <li class="nav-item">
-                        <a class="nav-link" href="index.php">Home</a>
+                        <a class="nav-link <?= $current_page === 'index.php' ? 'active' : '' ?>" href="index.php" <?= $current_page === 'index.php' ? 'aria-current="page"' : '' ?>>Home</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="internship.php">Internships</a>
+                        <a class="nav-link <?= $current_page === 'internship.php' ? 'active' : '' ?>" href="internship.php" <?= $current_page === 'internship.php' ? 'aria-current="page"' : '' ?>>Internships</a>
                     </li>
                     <?php if(is_logged_in()): ?>
                         <li class="nav-item">
-                            <a class="nav-link" href="myaccount.php">My Account</a>
+                            <a class="nav-link <?= $current_page === 'myaccount.php' ? 'active' : '' ?>" href="myaccount.php" <?= $current_page === 'myaccount.php' ? 'aria-current="page"' : '' ?>>My Account</a>
                         </li>
+                        <?php if(has_permission('superadmin')): ?><li class="nav-item"><a class="nav-link" href="SuperAdmin/index.php">Superadmin</a></li><?php endif; ?>
                         <li class="nav-item">
-                            <a class="nav-link" href="logout.php">Logout</a>
+                            <a class="nav-link nav-action" href="logout.php">Sign out</a>
                         </li>
                     <?php else: ?>
                         <li class="nav-item">
-                            <a class="nav-link" href="register.php">Register</a>
+                        <a class="nav-link" href="register.php">Create account</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="login.php">Login</a>
+                        <a class="nav-link nav-action" href="login.php">Sign in</a>
                         </li>
                     <?php endif; ?>
-                </ul>
-                <ul class="navbar-nav ml-auto nav-flex-icons">
-                    <li class="nav-item">
-                        <a href="#" class="nav-link waves-effect waves-light" aria-label="Twitter">
-                            <i class="fab fa-twitter"></i>
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a href="#" class="nav-link waves-effect waves-light" aria-label="Facebook">
-                            <i class="fab fa-facebook"></i>
-                        </a>
-                    </li>
                 </ul>
             </div>
         </nav>
     </header>
-    <main class="container mt-5">
+    <main class="container site-main" id="main-content" tabindex="-1">
         <?php if($message = flash('success_flash')): ?>
             <div class="alert alert-success alert-dismissible fade show" role="alert">
                 <?= sanitize($message) ?>

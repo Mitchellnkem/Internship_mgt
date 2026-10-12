@@ -8,6 +8,9 @@ if(is_logged_in()){
 $errors = array();
 
 if($_SERVER['REQUEST_METHOD'] === 'POST'){
+    if (!csrf_is_valid()) {
+        $errors[] = 'Your session expired. Refresh the page and try again.';
+    }
     $email = isset($_POST['email']) ? trim($_POST['email']) : '';
     $password = isset($_POST['password']) ? $_POST['password'] : '';
     
@@ -19,10 +22,12 @@ if($_SERVER['REQUEST_METHOD'] === 'POST'){
     }
     
     if(empty($errors)){
-        $email_escaped = $db->real_escape_string($email);
-        $query = $db->query("SELECT * FROM users WHERE email = '{$email_escaped}' LIMIT 1");
+        $stmt = $db->prepare('SELECT id, password FROM users WHERE email = ? LIMIT 1');
+        $stmt->bind_param('s', $email);
+        $stmt->execute();
+        $query = $stmt->get_result();
         if($query && $query->num_rows > 0){
-            $user = mysqli_fetch_assoc($query);
+            $user = $query->fetch_assoc();
             if(password_verify($password, $user['password'])){
                 login($user['id']);
                 redirect('index.php');
@@ -32,6 +37,7 @@ if($_SERVER['REQUEST_METHOD'] === 'POST'){
         } else {
             $errors[] = 'Invalid email or password';
         }
+        $stmt->close();
     }
 }
 ?>
@@ -47,6 +53,7 @@ if($_SERVER['REQUEST_METHOD'] === 'POST'){
                 <?php endif; ?>
                 
                 <form method="POST" action="login.php">
+                    <?= csrf_field() ?>
                     <div class="form-group">
                         <label for="email">Email Address</label>
                         <input type="email" class="form-control" id="email" name="email" 

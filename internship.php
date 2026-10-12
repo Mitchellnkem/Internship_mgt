@@ -37,10 +37,10 @@ $internships = !empty($search) ? search_internships($search, 50) : get_internshi
                         
                         <p class="card-text flex-grow-1">
                             <small>
-                                <i class="fas fa-map-marker-alt"></i> <?= sanitize($job['location']) ?><br>
-                                <i class="fas fa-calendar"></i> Posted: <?= pretty_date($job['posted_at']) ?><br>
+                                <span class="job-meta-label">Location</span> <?= sanitize($job['location']) ?><br>
+                                <span class="job-meta-label">Posted</span> <?= pretty_date($job['posted_at']) ?><br>
                                 <?php if(!empty($job['duration'])): ?>
-                                    <i class="fas fa-hourglass-half"></i> Duration: <?= sanitize($job['duration']) ?><br>
+                                    <span class="job-meta-label">Duration</span> <?= sanitize($job['duration']) ?><br>
                                 <?php endif; ?>
                             </small>
                         </p>

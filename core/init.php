@@ -14,7 +14,7 @@ if (session_status() === PHP_SESSION_NONE) {
 
 $db = mysqli_connect(DB_HOST, DB_USER, DB_PASS, DB_NAME);
 if(mysqli_connect_errno()){
-    error_log('InternshipHub database connection failed: '.mysqli_connect_error());
+    error_log('BIT-InternshipHub database connection failed: '.mysqli_connect_error());
     http_response_code(503);
     echo 'The service is temporarily unavailable. Please try again later.';
     exit;
