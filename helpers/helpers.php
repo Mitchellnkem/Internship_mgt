@@ -43,10 +43,17 @@ function flash($name = '', $string = ''){
 }
 
 function login($user_id){
+    if (session_status() === PHP_SESSION_ACTIVE) {
+        session_regenerate_id(true);
+    }
     $_SESSION['SBUser'] = (int)$user_id;
     global $db;
-    $date = date('Y-m-d H:i:s');
-    $db->query("UPDATE users SET last_login = '{$date}' WHERE id = '{$_SESSION['SBUser']}' LIMIT 1");
+    $stmt = $db->prepare('UPDATE users SET last_login = NOW() WHERE id = ? LIMIT 1');
+    if ($stmt) {
+        $stmt->bind_param('i', $_SESSION['SBUser']);
+        $stmt->execute();
+        $stmt->close();
+    }
     flash('success_flash', 'You are now logged in!');
 }
 
@@ -71,6 +78,22 @@ function has_permission($permission = 'admin'){
     }
     $permissions = array_map('trim', explode(',', $user_data['permissions']));
     return in_array($permission, $permissions, true);
+}
+
+function csrf_token(){
+    if (empty($_SESSION['csrf_token'])) {
+        $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+    }
+    return $_SESSION['csrf_token'];
+}
+
+function csrf_field(){
+    return '<input type="hidden" name="csrf_token" value="'.sanitize(csrf_token()).'">';
+}
+
+function csrf_is_valid(){
+    return isset($_POST['csrf_token'], $_SESSION['csrf_token']) &&
+        is_string($_POST['csrf_token']) && hash_equals($_SESSION['csrf_token'], $_POST['csrf_token']);
 }
 
 function get_user_by_id($id){

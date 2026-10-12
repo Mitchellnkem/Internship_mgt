@@ -1,17 +1,25 @@
 <?php
 
-if(session_status() === PHP_SESSION_NONE){
-    session_start();
-}
-
 require_once dirname(__DIR__).'/config.php';
 require_once ROOT_PATH.'helpers/helpers.php';
 
+if (session_status() === PHP_SESSION_NONE) {
+    $https = !empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off';
+    session_set_cookie_params(array(
+        'lifetime' => 0, 'path' => '/', 'secure' => $https,
+        'httponly' => true, 'samesite' => 'Lax'
+    ));
+    session_start();
+}
+
 $db = mysqli_connect(DB_HOST, DB_USER, DB_PASS, DB_NAME);
 if(mysqli_connect_errno()){
-    echo 'Database connection failed: '.mysqli_connect_error();
+    error_log('InternshipHub database connection failed: '.mysqli_connect_error());
+    http_response_code(503);
+    echo 'The service is temporarily unavailable. Please try again later.';
     exit;
 }
+$db->set_charset('utf8mb4');
 
 $cart_id = '';
 if(isset($_COOKIE[CART_COOKIE])){

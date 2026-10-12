@@ -1,11 +1,12 @@
 <?php
 
 define('ROOT_PATH', realpath(dirname(__FILE__)).'/');
-define('BASEURL', '/internship/');
+define('BASEURL', '/internship_mgt/');
 
 define('DB_HOST', 'localhost');
-define('DB_USER', 'root');
-define('DB_PASS', '');
+// Supply deployment credentials through environment variables. Never commit production secrets.
+define('DB_USER', getenv('INTERNSHIP_DB_USER') ?: 'root');
+define('DB_PASS', getenv('INTERNSHIP_DB_PASS') ?: '');
 define('DB_NAME', 'internship');
 
 define('CART_COOKIE', 'Sum123Am1902intern');
