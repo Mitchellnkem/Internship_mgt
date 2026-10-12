@@ -1,60 +1,52 @@
 <?php
 require_once 'includes/header.php';
 
-$search = isset($_GET['search']) ? $_GET['search'] : '';
-$internships = !empty($search) ? search_internships($search, 50) : get_internships(50);
+$search = isset($_GET['search']) ? trim($_GET['search']) : '';
+$internships = $search !== '' ? search_internships($search, 50) : get_internships(50);
 ?>
 
-<div class="row mt-5 mb-4">
-    <div class="col-md-12">
-        <h2>Browse Internships</h2>
-        <hr>
-        <form method="GET" action="internship.php" class="mb-4">
-            <div class="input-group">
-                <input type="text" class="form-control" name="search" placeholder="Search by title, company, location..." 
-                    value="<?= isset($_GET['search']) ? sanitize($_GET['search']) : '' ?>">
-                <div class="input-group-append">
-                    <button class="btn btn-primary" type="submit">Search</button>
-                    <a href="internship.php" class="btn btn-secondary">Clear</a>
-                </div>
-            </div>
+<section class="listing-page" aria-labelledby="listing-title">
+    <header class="listing-hero">
+        <span class="eyebrow">OPPORTUNITIES TO GET YOU STARTED</span>
+        <h1 id="listing-title">Find work worth<br class="desktop-break"> doing.</h1>
+        <p>Explore internships where you can learn, contribute, and take your next step.</p>
+        <form method="GET" action="internship.php" class="listing-search" role="search">
+            <label for="internship-search" class="sr-only">Search internships by title, company, or location</label>
+            <input type="search" class="form-control" id="internship-search" name="search" placeholder="Try a title, company, or location" value="<?= sanitize($search) ?>">
+            <button class="btn btn-primary" type="submit">Search opportunities</button>
+            <?php if ($search !== ''): ?><a class="search-clear" href="internship.php">Clear search</a><?php endif; ?>
         </form>
-    </div>
-</div>
+    </header>
 
-<?php if(empty($internships)): ?>
-    <div class="alert alert-info">
-        <p>No internships found. Try adjusting your search criteria.</p>
+    <div class="listing-toolbar">
+        <div><span class="eyebrow">LATEST ROLES</span><h2><?= $search !== '' ? 'Search results' : 'Explore internships' ?></h2></div>
+        <p><?= number_format(count($internships)) ?> <?= count($internships) === 1 ? 'opportunity' : 'opportunities' ?><?= $search !== '' ? ' for &ldquo;'.sanitize($search).'&rdquo;' : '' ?></p>
     </div>
-<?php else: ?>
-    <div class="row">
-        <?php foreach($internships as $job): ?>
-            <div class="col-md-6 col-lg-4 mb-4">
-                <div class="card h-100 shadow-sm">
-                    <div class="card-body d-flex flex-column">
-                        <h5 class="card-title"><?= sanitize($job['title']) ?></h5>
-                        <h6 class="card-subtitle mb-2 text-muted"><?= sanitize($job['company']) ?></h6>
-                        
-                        <p class="card-text flex-grow-1">
-                            <small>
-                                <span class="job-meta-label">Location</span> <?= sanitize($job['location']) ?><br>
-                                <span class="job-meta-label">Posted</span> <?= pretty_date($job['posted_at']) ?><br>
-                                <?php if(!empty($job['duration'])): ?>
-                                    <span class="job-meta-label">Duration</span> <?= sanitize($job['duration']) ?><br>
-                                <?php endif; ?>
-                            </small>
-                        </p>
-                        
-                        <p class="card-text">
-                            <small><?= substr(sanitize($job['description']), 0, 100) ?>...</small>
-                        </p>
-                        
-                        <a href="application.php?id=<?= $job['id'] ?>" class="btn btn-primary btn-sm btn-block">View & Apply</a>
-                    </div>
-                </div>
-            </div>
-        <?php endforeach; ?>
-    </div>
-<?php endif; ?>
+
+    <?php if (empty($internships)): ?>
+        <section class="listing-empty" aria-live="polite">
+            <span class="empty-mark" aria-hidden="true">?</span>
+            <h2>No matching opportunities yet</h2>
+            <p>Try a broader search, or clear your search to see all current listings.</p>
+            <?php if ($search !== ''): ?><a class="btn btn-secondary" href="internship.php">View all internships</a><?php endif; ?>
+        </section>
+    <?php else: ?>
+        <div class="job-grid">
+            <?php foreach ($internships as $job): ?>
+                <article class="job-card">
+                    <div class="job-card-top"><span class="job-type-label">INTERNSHIP</span><span class="job-posted">Posted <?= sanitize(pretty_date($job['posted_at'])) ?></span></div>
+                    <h3><a href="application.php?id=<?= (int)$job['id'] ?>"><?= sanitize($job['title']) ?></a></h3>
+                    <p class="job-company"><?= sanitize($job['company']) ?></p>
+                    <ul class="job-facts" aria-label="Opportunity details">
+                        <li><span>Location</span><?= sanitize($job['location']) ?></li>
+                        <?php if (!empty($job['duration'])): ?><li><span>Duration</span><?= sanitize($job['duration']) ?></li><?php endif; ?>
+                    </ul>
+                    <p class="job-summary"><?= sanitize(substr(strip_tags($job['description']), 0, 160)) ?><?= strlen(strip_tags($job['description'])) > 160 ? '...' : '' ?></p>
+                    <a class="job-card-action" href="application.php?id=<?= (int)$job['id'] ?>">View opportunity <span aria-hidden="true">&rarr;</span></a>
+                </article>
+            <?php endforeach; ?>
+        </div>
+    <?php endif; ?>
+</section>
 
 <?php include 'includes/footer.php'; ?>

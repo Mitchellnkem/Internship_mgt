@@ -37,8 +37,8 @@ $metrics = array(
     <meta name="theme-color" content="#102a43">
     <title>Platform overview | BIT-InternshipHub</title>
     <link rel="stylesheet" href="../css/bootstrap.min.css">
-    <link rel="stylesheet" href="../css/style.css">
-    <link rel="stylesheet" href="../css/components.css">
+    <link rel="stylesheet" href="../css/style.css?v=3">
+    <link rel="stylesheet" href="../css/components.css?v=3">
 </head>
 <body>
 <a class="skip-link" href="#admin-content">Skip to content</a>

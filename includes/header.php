@@ -10,8 +10,8 @@ $current_page = basename($_SERVER['PHP_SELF']);
     <title>BIT-InternshipHub</title>
     <link href="css/bootstrap.min.css" rel="stylesheet">
     <link href="css/mdb.min.css" rel="stylesheet">
-    <link href="css/style.css" rel="stylesheet">
-    <link href="css/components.css" rel="stylesheet">
+    <link href="css/style.css?v=3" rel="stylesheet">
+    <link href="css/components.css?v=3" rel="stylesheet">
 </head>
 <body>
     <a class="skip-link" href="#main-content">Skip to content</a>
