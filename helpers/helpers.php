@@ -1,153 +1,154 @@
 
 <?php
 
-    function display_errors($errors){
-        $display = '<ul class="bg-danger">';
-        foreach($errors as $error){
-            $display .= '<li class="text-danger">'.$error.'</li>';
-        }
-        $display .= '</ul>';
-        return $display;
+function display_errors($errors){
+    $display = '<div class="alert alert-danger"><ul class="mb-0">';
+    foreach($errors as $error){
+        $display .= '<li>'.sanitize($error).'</li>';
     }
+    $display .= '</ul></div>';
+    return $display;
+}
 
-    function sanitize($dirty){
-        return htmlentities($dirty, ENT_QUOTES, "UTF-8");
-    }
+function sanitize($dirty){
+    return htmlentities($dirty, ENT_QUOTES, 'UTF-8');
+}
 
-    function money($number){
-        return '$'.number_format($number, 2);
-    }
+function money($number){
+    return '$'.number_format((float)$number, 2);
+}
 
-    function login($user_id){
-        $_SESSION['SBUser'] = $user_id;
-        global $db;
-        $date = date("Y-m-d H:i:s");
-        $db->query("UPDATE users SET last_login = '$date' WHERE id = '$user_id'");
-        $_SESSION['success_flash'] = 'You are now logged in!';
-    }
+function pretty_date($date){
+    return date('M d, Y h:i A', strtotime($date));
+}
 
-    function is_logged_in(){
-        if(isset($_SESSION['SBUser']) && $_SESSION['SBUser'] > 0){
+function redirect($url){
+    header('Location: '.$url);
+    exit;
+}
+
+function flash($name = '', $string = ''){
+    if(!empty($name)){
+        if(!empty($string)){
+            $_SESSION[$name] = $string;
             return true;
         }
-    }
-    return false;
-
-
-    function login_error_redirect($url = 'login.php'){
-        $_SESSION['error_flash'] = 'You must be logged in to access this page';
-        header('Location: '.$url);
-    }
-
-    function permission_error_redirect($url = 'login.php'){
-       $_SESSION['error_flash'] = 'You do not have permission to access this page';
-    }
-
-    function has_permission($permission = 'admin'){
-        global $user_data;
-        $permissions = explode(',', $user_data['permissions']);
-        if(in_array($permission, $permissions, true)){
-            return true;
+        if(isset($_SESSION[$name])){
+            $message = $_SESSION[$name];
+            unset($_SESSION[$name]);
+            return $message;
         }
+    }
+    return '';
+}
+
+function login($user_id){
+    $_SESSION['SBUser'] = (int)$user_id;
+    global $db;
+    $date = date('Y-m-d H:i:s');
+    $db->query("UPDATE users SET last_login = '{$date}' WHERE id = '{$_SESSION['SBUser']}' LIMIT 1");
+    flash('success_flash', 'You are now logged in!');
+}
+
+function is_logged_in(){
+    return isset($_SESSION['SBUser']) && $_SESSION['SBUser'] > 0;
+}
+
+function login_error_redirect($url = 'login.php'){
+    flash('error_flash', 'You must be logged in to access this page');
+    redirect($url);
+}
+
+function permission_error_redirect($url = 'login.php'){
+    flash('error_flash', 'You do not have permission to access this page');
+    redirect($url);
+}
+
+function has_permission($permission = 'admin'){
+    global $user_data;
+    if(empty($user_data['permissions'])){
         return false;
     }
-    // function get_category($child_id){
-	// 	global $db;
-	// 	$id = sanitize($child_id);
-	// 	$sql = "SELECT p.id AS 'pid',p.category AS 'parent', c.id AS 'cid', c.category AS 'child'
-	// 			FROM categories c
-	// 			INNER JOIN categories p
-	// 			ON c.parent = p.id
-	// 			WHERE c.id = '$id'";
-	// 	$query = $db->query($sql);
-	// 	$category = mysqli_fetch_assoc($query);
-	// 	return $category;
-	// }
-?>
-<?php
-// function sanitize($dirty){
-//     return htmlentities($dirty, ENT_QUOTES, "UTF-8");
-// }
+    $permissions = array_map('trim', explode(',', $user_data['permissions']));
+    return in_array($permission, $permissions, true);
+}
 
-// function money($number){
-//     return '$'.number_format($number, 2);
-// }
+function get_user_by_id($id){
+    global $db;
+    $id = (int)$id;
+    $query = $db->query("SELECT * FROM users WHERE id = '{$id}' LIMIT 1");
+    return ($query && $query->num_rows) ? mysqli_fetch_assoc($query) : null;
+}
 
-// function login($user_id){
-//     $_SESSION['SBUser'] = $user_id;
-//     global $db;
-//     $date = date("Y-m-d H:i:s");
-//     $db->query("UPDATE users SET last_login = '$date' WHERE id = '$user_id'");
-//     $_SESSION['success_flash'] = 'You are now logged in!';
-//     header('Location: index.php');
-// }
+function get_internships($limit = 12){
+    global $db;
+    $limit = (int)$limit;
+    $query = $db->query("SELECT * FROM internships ORDER BY posted_at DESC LIMIT {$limit}");
+    $jobs = array();
+    while($row = mysqli_fetch_assoc($query)){
+        $jobs[] = $row;
+    }
+    return $jobs;
+}
 
-// function is_logged_in(){
-//     if(isset($_SESSION['SBUser']) && $_SESSION['SBUser'] > 0){
-//         return true;
-//     }
-//     return false;
-// }
+function search_internships($search = '', $limit = 20){
+    global $db;
+    $search = $db->real_escape_string($search);
+    $sql = "SELECT * FROM internships";
+    if(!empty($search)){
+        $sql .= " WHERE title LIKE '%{$search}%' OR company LIKE '%{$search}%' OR location LIKE '%{$search}%' OR description LIKE '%{$search}%'";
+    }
+    $sql .= " ORDER BY posted_at DESC LIMIT " . (int)$limit;
+    $query = $db->query($sql);
+    $jobs = array();
+    while($row = mysqli_fetch_assoc($query)){
+        $jobs[] = $row;
+    }
+    return $jobs;
+}
 
-// function login_error_redirect($url = 'login.php'){
-//     $_SESSION['error_flash'] = 'You must be logged in to access that page';
-//     header('Location: '.$url);
-// }
+function get_internship($id){
+    global $db;
+    $id = (int)$id;
+    $query = $db->query("SELECT * FROM internships WHERE id = '{$id}' LIMIT 1");
+    return ($query && $query->num_rows) ? mysqli_fetch_assoc($query) : null;
+}
 
-// function permission_error_redirect($url = 'login.php'){
-//     $_SESSION['error_flash'] = 'You do not have permission to access that page';
-//     header('Location: '.$url);
-// }
+function get_application($user_id, $internship_id){
+    global $db;
+    $user_id = (int)$user_id;
+    $internship_id = (int)$internship_id;
+    $query = $db->query("SELECT * FROM applications WHERE cus_id = '{$user_id}' AND int_id = '{$internship_id}' LIMIT 1");
+    return ($query && $query->num_rows) ? mysqli_fetch_assoc($query) : null;
+}
 
-// function has_permission($permission = 'admin'){
-//     global $user_data;
-//     $permissions = explode(',', $user_data['permissions']);
-//     if(in_array($permission, $permissions, true)){
-//         return true;
-//     }
-//     return false;
-// }
+function apply_for_internship($user_id, $internship_id, $cover_letter = ''){
+    global $db;
+    $user_id = (int)$user_id;
+    $internship_id = (int)$internship_id;
+    if(get_application($user_id, $internship_id)){
+        return false;
+    }
+    $cover_letter = $db->real_escape_string($cover_letter);
+    $db->query("INSERT INTO applications (cus_id, int_id, applied, application_date, status, cover_letter) VALUES ('{$user_id}', '{$internship_id}', 1, NOW(), 'pending', '{$cover_letter}')");
+    return $db->insert_id;
+}
 
-// function pretty_date($date){
-//     return date("M d, Y h:i A", strtotime($date));
-// }
+function get_user_applications($user_id){
+    global $db;
+    $user_id = (int)$user_id;
+    $sql = "SELECT a.*, i.title, i.company, i.location, i.posted_at FROM applications a LEFT JOIN internships i ON a.int_id = i.id WHERE a.cus_id = '{$user_id}' ORDER BY a.application_date DESC";
+    $query = $db->query($sql);
+    $applications = array();
+    while($row = mysqli_fetch_assoc($query)){
+        $applications[] = $row;
+    }
+    return $applications;
+}
 
-// function get_category($child_id){
-//     global $db;
-//     $id = sanitize($child_id);
-//     $sql = "SELECT p.id AS 'pid', p.category AS 'parent', c.id AS 'cid', c.category AS 'child'
-//             FROM categories c
-//             INNER JOIN categories p ON c.parent = p.id
-//             WHERE c.id = '$id'";
-//     $query = $db->query($sql);
-//     $category = mysqli_fetch_assoc($query);
-//     return $category;
-// }
-
-// function sizes($string){
-//     $sizes = explode(',', $string);
-//     $return = '';
-//     foreach($sizes as $size){
-//         $return .= '<option value="'.$size.'">'.$size.'</option>';
-//     }
-//     return $return;
-// }
-
-// function brands($string){
-//     $brands = explode(',', $string);
-//     $return = '';
-//     foreach($brands as $brand){
-//         $return .= '<option value="'.$brand.'">'.$brand.'</option>';
-//     }
-//     return $return;
-// }
-
-// function rupiah($number){
-//     return 'Rp '.number_format($number, 0, ',', '.');
-// }
-
-// function rupiah_cents($number){
-//     return 'Rp '.number_format($number, 2, ',', '.');
-// }
+function get_logged_in_user_name(){
+    global $user_data;
+    return !empty($user_data['full_name']) ? $user_data['full_name'] : 'Guest';
+}
 
 ?>

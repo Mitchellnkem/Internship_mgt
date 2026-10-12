@@ -1,36 +1,36 @@
 <?php
 
-$db = mysqli_connect('localhost', 'root', '', 'internship');
-if(mysqli_connect_errno()){
-    echo 'Database connection failed with the following errors: '.mysqli_connect_error();
-    die();
+if(session_status() === PHP_SESSION_NONE){
+    session_start();
 }
 
-require_once $_SERVER['DOCUMENT_ROOT'].'/internship/config.php';
-require_once BASEURL.'helpers/helpers.php';
+require_once dirname(__DIR__).'/config.php';
+require_once ROOT_PATH.'helpers/helpers.php';
+
+$db = mysqli_connect(DB_HOST, DB_USER, DB_PASS, DB_NAME);
+if(mysqli_connect_errno()){
+    echo 'Database connection failed: '.mysqli_connect_error();
+    exit;
+}
 
 $cart_id = '';
 if(isset($_COOKIE[CART_COOKIE])){
     $cart_id = sanitize($_COOKIE[CART_COOKIE]);
 }
-if(isset($_SESSION['SBUser'])){
-    $user_id = $_SESSION['SBUser'];
-	$query = $db->query("SELECT * FROM users WHERE id = '$user_id'");
-	$user_data = mysqli_fetch_assoc($query);
-	$full_name = explode(' ', $user_data['full_name']);
-	$user_data['first'] = $full_name[0];
-	$user_data['last'] = $full_name[1];
+if(!empty($cart_id)){
+    setcookie(CART_COOKIE, $cart_id, CART_COOKIE_EXPIRE, '/', '', false, true);
 }
 
-
-// if(isset($_SESSION['success_flash'])){
-// 	echo '<p class="text-success text-center">'.$_SESSION['success_flash'].'</p>';
-// 	unset($_SESSION['success_flash']);
-// }
-
-// if(isset($_SESSION['error_flash'])){
-// 	echo '<p class="text-danger text-center">'.$_SESSION['error_flash'].'</p>';
-// 	unset($_SESSION['error_flash']);
-// }
-
-?>
+$user_data = [];
+if(isset($_SESSION['SBUser']) && is_numeric($_SESSION['SBUser'])){
+    $user_id = (int)$_SESSION['SBUser'];
+    $query = $db->query("SELECT * FROM users WHERE id = '{$user_id}' LIMIT 1");
+    if($query && $query->num_rows){
+        $user_data = mysqli_fetch_assoc($query);
+        $names = explode(' ', trim($user_data['full_name']));
+        $user_data['first'] = isset($names[0]) ? $names[0] : '';
+        $user_data['last'] = isset($names[1]) ? $names[1] : '';
+    } else {
+        unset($_SESSION['SBUser']);
+    }
+}
