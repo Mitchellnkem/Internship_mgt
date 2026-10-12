@@ -22,13 +22,13 @@ if($_SERVER['REQUEST_METHOD'] === 'POST'){
     }
     
     if(empty($errors)){
-        $stmt = $db->prepare('SELECT id, password FROM users WHERE email = ? LIMIT 1');
+        $stmt = $db->prepare('SELECT id, password, account_status FROM users WHERE email = ? LIMIT 1');
         $stmt->bind_param('s', $email);
         $stmt->execute();
         $query = $stmt->get_result();
         if($query && $query->num_rows > 0){
             $user = $query->fetch_assoc();
-            if(password_verify($password, $user['password'])){
+            if(password_verify($password, $user['password']) && $user['account_status'] === 'active'){
                 login($user['id']);
                 redirect('index.php');
             } else {

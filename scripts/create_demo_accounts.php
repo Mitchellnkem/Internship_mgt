@@ -1,6 +1,7 @@
 <?php
 /**
- * Create local demo logins. Run from the project root with:
+ * Create local demo logins after the schema is installed. Run from the project root with:
+ *   php scripts/setup_internship_schema.php
  *   php scripts/create_demo_accounts.php
  * This script is intentionally unavailable over HTTP.
  */
@@ -15,21 +16,11 @@ mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
 $db = new mysqli(DB_HOST, DB_USER, DB_PASS, DB_NAME);
 $db->set_charset('utf8mb4');
 
-// The checked-in project SQL does not define users. Create the columns used by
-// the current registration, login, and permission checks when the table is absent.
-$db->query("CREATE TABLE IF NOT EXISTS users (
-    id INT UNSIGNED NOT NULL AUTO_INCREMENT,
-    full_name VARCHAR(160) NOT NULL,
-    email VARCHAR(254) NOT NULL,
-    password VARCHAR(255) NOT NULL,
-    user_type VARCHAR(32) NOT NULL DEFAULT 'student',
-    permissions VARCHAR(255) NOT NULL DEFAULT '',
-    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    last_login DATETIME NULL DEFAULT NULL,
-    PRIMARY KEY (id),
-    UNIQUE KEY users_email_unique (email),
-    KEY users_type_index (user_type)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci");
+$usersTable = $db->query("SHOW TABLES LIKE 'users'");
+if (!$usersTable || $usersTable->num_rows === 0) {
+    fwrite(STDERR, "Users table is missing. Run php scripts/setup_internship_schema.php first.\n");
+    exit(1);
+}
 
 $accounts = array(
     array('Demo Student', 'student.demo@internshiphub.test', 'StudentDemo2026!', 'student', 'student,apply_jobs'),

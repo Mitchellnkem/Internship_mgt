@@ -105,10 +105,19 @@ function get_user_by_id($id){
 
 function get_internships($limit = 12){
     global $db;
-    $limit = (int)$limit;
-    $query = $db->query("SELECT * FROM internships ORDER BY posted_at DESC LIMIT {$limit}");
+    $limit = max(1, min(100, (int)$limit));
+    try {
+        $query = $db->query("SELECT * FROM internships WHERE status = 'published' ORDER BY posted_at DESC LIMIT {$limit}");
+    } catch (mysqli_sql_exception $exception) {
+        error_log('BIT-InternshipHub could not load internship listings: '.$exception->getMessage());
+        return array();
+    }
+    if (!$query) {
+        error_log('BIT-InternshipHub could not load internship listings: '.$db->error);
+        return array();
+    }
     $jobs = array();
-    while($row = mysqli_fetch_assoc($query)){
+    while($row = $query->fetch_assoc()){
         $jobs[] = $row;
     }
     return $jobs;
@@ -116,15 +125,25 @@ function get_internships($limit = 12){
 
 function search_internships($search = '', $limit = 20){
     global $db;
+    $limit = max(1, min(100, (int)$limit));
     $search = $db->real_escape_string($search);
-    $sql = "SELECT * FROM internships";
+    $sql = "SELECT * FROM internships WHERE status = 'published'";
     if(!empty($search)){
-        $sql .= " WHERE title LIKE '%{$search}%' OR company LIKE '%{$search}%' OR location LIKE '%{$search}%' OR description LIKE '%{$search}%'";
+        $sql .= " AND (title LIKE '%{$search}%' OR company LIKE '%{$search}%' OR location LIKE '%{$search}%' OR description LIKE '%{$search}%')";
     }
-    $sql .= " ORDER BY posted_at DESC LIMIT " . (int)$limit;
-    $query = $db->query($sql);
+    $sql .= " ORDER BY posted_at DESC LIMIT " . $limit;
+    try {
+        $query = $db->query($sql);
+    } catch (mysqli_sql_exception $exception) {
+        error_log('BIT-InternshipHub could not search internship listings: '.$exception->getMessage());
+        return array();
+    }
+    if (!$query) {
+        error_log('BIT-InternshipHub could not search internship listings: '.$db->error);
+        return array();
+    }
     $jobs = array();
-    while($row = mysqli_fetch_assoc($query)){
+    while($row = $query->fetch_assoc()){
         $jobs[] = $row;
     }
     return $jobs;
@@ -133,7 +152,12 @@ function search_internships($search = '', $limit = 20){
 function get_internship($id){
     global $db;
     $id = (int)$id;
-    $query = $db->query("SELECT * FROM internships WHERE id = '{$id}' LIMIT 1");
+    try {
+        $query = $db->query("SELECT * FROM internships WHERE id = '{$id}' AND status = 'published' LIMIT 1");
+    } catch (mysqli_sql_exception $exception) {
+        error_log('BIT-InternshipHub could not load an internship: '.$exception->getMessage());
+        return null;
+    }
     return ($query && $query->num_rows) ? mysqli_fetch_assoc($query) : null;
 }
 

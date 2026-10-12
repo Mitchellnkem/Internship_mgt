@@ -13,16 +13,16 @@
 
 ## Important findings
 
-The repository contains many zero-byte files, not just missing styles. The employer portal, admin portal, student account management pages, and several shared includes are empty. This makes those functions unavailable and means there is no complete path to verify existing role checks or workflows. The only checked-in SQL schema defines `applications`; it does not define `users` or `internships`, although the PHP expects both. I kept the dashboard aligned with those existing assumptions instead of guessing columns or silently creating a competing schema.
+The repository contains many zero-byte files, not just missing styles. The employer portal, admin portal, student account management pages, and several shared includes are empty, so those workflows still need implementation. `internship.sql` now defines the full platform schema, and `scripts/setup_internship_schema.php` applies it and safely upgrades the existing local database without dropping rows. The existing database has six applications whose internship IDs do not exist; the installer preserves those records and therefore skips only the application-to-internship foreign key until those orphan records are reviewed. All other relationships are installed when their existing data supports them. Run the setup script before the demo-account seeder.
 
 `BASEURL` previously pointed to `/internship/` although the workspace/app directory is `internship_mgt`; update it to match the actual deployed URL if your WAMP virtual path differs.
 
 ## Recommended next build steps
 
-1. Restore/define the complete database schema (`users`, `internships`, `applications`, employer ownership, indexes, foreign keys, unique application per student/listing).
+1. Review and resolve the six legacy applications that refer to missing internship records, then rerun the schema setup so the application-to-internship foreign key can be enabled.
 2. Build login, registration, and logout flows around prepared statements, server-side role checks, password policy, rate limits, CSRF validation, and audit events.
 3. Implement employer listing management and student applications with ownership checks, pagination, and safe resume upload handling.
 4. Add superadmin user moderation, listing review, and audit log only after the data model and operator provisioning process are agreed.
 5. Add production deployment controls: HTTPS, least-privilege database user, backups, error logging/monitoring, and a supported PHP/MySQL version.
 
-The CSRF helpers are infrastructure for the form handlers; each mutating form still needs to include `csrf_field()` and reject POST requests where `csrf_is_valid()` is false. No complete test run was performed because this is a broad, schema-incomplete restoration and the project has no checked-in test harness.
+The profile, token, notification, status-history, and audit tables provide storage; their corresponding user-facing workflows and write paths still need implementation. The CSRF helpers are infrastructure for the form handlers; each mutating form still needs to include `csrf_field()` and reject POST requests where `csrf_is_valid()` is false. No full application test run was performed.

@@ -26,9 +26,14 @@ $internships = $search !== '' ? search_internships($search, 50) : get_internship
     <?php if (empty($internships)): ?>
         <section class="listing-empty" aria-live="polite">
             <span class="empty-mark" aria-hidden="true">?</span>
-            <h2>No matching opportunities yet</h2>
-            <p>Try a broader search, or clear your search to see all current listings.</p>
-            <?php if ($search !== ''): ?><a class="btn btn-secondary" href="internship.php">View all internships</a><?php endif; ?>
+            <?php if ($search !== ''): ?>
+                <h2>No matching opportunities yet</h2>
+                <p>Try a broader search, or clear your search to see all current listings.</p>
+                <a class="btn btn-secondary" href="internship.php">View all internships</a>
+            <?php else: ?>
+                <h2>No internships posted yet</h2>
+                <p>New opportunities will appear here when they are added. Please check back soon.</p>
+            <?php endif; ?>
         </section>
     <?php else: ?>
         <div class="job-grid">
