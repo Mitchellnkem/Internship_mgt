@@ -5,7 +5,7 @@
             <div class="row">
                 <div class="col-md-6 col-lg-4 mb-4">
                     <h6 class="text-uppercase font-weight-bold">
-                        <i class="fas fa-graduation-cap mr-2"></i>InternshipHub
+                        <i class="fas fa-graduation-cap mr-2"></i>BIT-InternshipHub
                     </h6>
                     <hr class="deep-purple accent-2 mb-4 mt-0 d-inline-block mx-auto" style="width: 60px;">
                     <p>Connecting students with quality internship opportunities and employer partners.</p>
@@ -20,14 +20,14 @@
                 <div class="col-md-6 col-lg-4 mb-4">
                     <h6 class="text-uppercase font-weight-bold">Contact</h6>
                     <hr class="deep-purple accent-2 mb-4 mt-0 d-inline-block mx-auto" style="width: 60px;">
-                    <p><i class="fas fa-home mr-3"></i> City Campus, Anywhere</p>
-                    <p><i class="fas fa-envelope mr-3"></i> support@internshiphub.com</p>
+                    <p><i class="fas fa-home mr-3"></i> Remote, On-site Campus & Anywhere</p>
+                    <p><i class="fas fa-envelope mr-3"></i> support@bitinternshiphub.com</p>
                     <p><i class="fas fa-phone mr-3"></i> +1 234 567 8900</p>
                 </div>
             </div>
         </div>
         <div class="footer-copyright text-center py-3">
-            © <?= date('Y') ?> InternshipHub. All rights reserved.
+            © <?= date('Y') ?> BIT InternshipHub. || Cy3rch311 || All rights reserved.
         </div>
     </footer>
 

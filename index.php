@@ -3,7 +3,7 @@ require_once 'includes/header.php';
 ?>
 
 <div class="jumbotron text-center bg-primary text-white rounded-lg">
-    <h1 class="display-4">Welcome to BIT InternshipHub</h1>
+    <h1 class="display-4">Welcome to BIT-InternshipHub</h1>
     <p class="lead">Find meaningful internships, build your career, and connect with employers.</p>
     <hr class="my-4 bg-white">
     <p>Explore the latest opportunities, register as a student, or log in to manage your applications.</p>

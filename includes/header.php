@@ -9,7 +9,7 @@ require_once __DIR__ . '/../core/init.php';
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>InternshipHub</title>
+    <title>BIT - InternshipHub</title>
     <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.8.2/css/all.css">
     <link href="css/bootstrap.min.css" rel="stylesheet">
     <link href="css/mdb.min.css" rel="stylesheet">
@@ -18,7 +18,7 @@ require_once __DIR__ . '/../core/init.php';
 <body>
     <header>
         <nav class="navbar navbar-expand-lg navbar-dark default-color">
-            <a class="navbar-brand" href="index.php">InternshipHub</a>
+            <a class="navbar-brand" href="index.php">BIT-InternshipHub</a>
             <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarMain"
                 aria-controls="navbarMain" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
