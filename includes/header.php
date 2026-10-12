@@ -7,11 +7,13 @@ $current_page = basename($_SERVER['PHP_SELF']);
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BIT-InternshipHub</title>
+    <title><?= isset($page_title) ? sanitize($page_title).' | BIT-InternshipHub' : 'BIT-InternshipHub' ?></title>
     <link href="css/bootstrap.min.css" rel="stylesheet">
     <link href="css/mdb.min.css" rel="stylesheet">
     <link href="css/style.css?v=3" rel="stylesheet">
     <link href="css/components.css?v=3" rel="stylesheet">
+    <?php if (in_array($current_page, array('career-guide.php', 'career-skill.php'), true)): ?><link href="css/career-guide.css?v=1" rel="stylesheet"><?php endif; ?>
+    <?php if ($current_page === 'career-skill.php'): ?><link href="css/career-skill.css?v=1" rel="stylesheet"><?php endif; ?>
 </head>
 <body>
     <a class="skip-link" href="#main-content">Skip to content</a>
@@ -29,6 +31,9 @@ $current_page = basename($_SERVER['PHP_SELF']);
                     </li>
                     <li class="nav-item">
                         <a class="nav-link <?= $current_page === 'internship.php' ? 'active' : '' ?>" href="internship.php" <?= $current_page === 'internship.php' ? 'aria-current="page"' : '' ?>>Internships</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link <?= in_array($current_page, array('career-guide.php', 'career-skill.php'), true) ? 'active' : '' ?>" href="career-guide.php" <?= in_array($current_page, array('career-guide.php', 'career-skill.php'), true) ? 'aria-current="page"' : '' ?>>Career guide</a>
                     </li>
                     <?php if(is_logged_in()): ?>
                         <li class="nav-item">

@@ -9,7 +9,7 @@
             <a class="btn btn-primary btn-lg" href="internship.php">Explore internships <span aria-hidden="true">&rarr;</span></a>
             <a class="text-link" href="register.php">Create your account</a>
         </div>
-        <div class="hero-note"><span class="status-dot" aria-hidden="true"></span> A better start for students and the teams who hire them</div>
+        <div class="hero-note"><span class="status-dot" aria-hidden="true"></span> A better start for students and the teams who hire them <a class="hero-note-link" href="career-guide.php">Read the career guide</a></div>
     </div>
     <div class="hero-art" aria-label="An internship opportunity card on a warm, abstract background" role="img">
         <div class="art-sun"></div><div class="art-orbit orbit-one"></div><div class="art-orbit orbit-two"></div>

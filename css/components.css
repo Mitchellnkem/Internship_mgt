@@ -30,4 +30,6 @@ header{position:relative;z-index:20;border-bottom:1px solid var(--brand-line);ba
 .external-toolbar{margin-top:0}
 .external-search-status{min-height:24px;margin:0 2px 14px;color:#718398;font-size:.84rem}
 .external-load-more{display:block;margin:24px auto 0}
+.hero-note-link{color:var(--brand-blue);font-weight:800;text-decoration:underline;text-underline-offset:3px}
+.hero-note{flex-wrap:wrap}
 @media(max-width:700px){.listing-scope{flex:1 1 100%;width:100%;min-height:42px;border-top:1px solid #edf1f5!important}}
