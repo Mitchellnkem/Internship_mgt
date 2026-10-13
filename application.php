@@ -8,10 +8,12 @@ if(!$internship){
     flash('error_flash', 'Internship not found');
     redirect('internship.php');
 }
+record_recent_internship_view($internship_id);
 
 $has_applied = false;
 $application = null;
 $can_apply = is_logged_in() && isset($user_data['user_type']) && $user_data['user_type'] === 'student';
+$isSaved = $can_apply ? is_internship_saved($_SESSION['SBUser'], $internship_id) : false;
 
 if(is_logged_in()){
     $application = get_application($_SESSION['SBUser'], $internship_id);
@@ -103,8 +105,21 @@ if(is_logged_in() && $_SERVER['REQUEST_METHOD'] === 'POST' && !$has_applied && $
                 </form>
             <?php endif; ?>
         </div>
+        <?php if ($can_apply): ?>
+            <form class="save-internship-form" method="POST" action="student/save_internship.php">
+                <?= csrf_field() ?>
+                <input type="hidden" name="internship_id" value="<?= (int)$internship_id ?>">
+                <input type="hidden" name="action" value="<?= $isSaved ? 'remove' : 'save' ?>">
+                <input type="hidden" name="return_to" value="details">
+                <button class="btn <?= $isSaved ? 'btn-secondary' : 'btn-primary' ?> btn-block" type="submit"><?= $isSaved ? 'Remove from saved internships' : 'Save this internship' ?></button>
+            </form>
+        <?php elseif (!is_logged_in()): ?>
+            <p class="save-internship-signin"><a href="login.php">Sign in</a> to save this internship to your shortlist.</p>
+        <?php endif; ?>
         <p class="application-privacy">Your application is shared with the employer for this opportunity.</p>
     </aside>
 </div>
+
+<?php include 'widgets/recent.php'; ?>
 
 <?php include 'includes/footer.php'; ?>

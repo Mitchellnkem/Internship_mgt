@@ -69,6 +69,7 @@ $internships = $search !== '' ? search_internships($search, 50) : get_internship
         <div id="external-job-grid" class="job-grid" aria-live="polite"></div>
         <button id="external-load-more" class="btn btn-secondary external-load-more" type="button" hidden>Load more opportunities</button>
     </section>
+    <?php include 'widgets/recent.php'; ?>
 </section>
 
 <script>

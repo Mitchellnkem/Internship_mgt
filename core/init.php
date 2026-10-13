@@ -21,12 +21,16 @@ if(mysqli_connect_errno()){
 }
 $db->set_charset('utf8mb4');
 
-$cart_id = '';
-if(isset($_COOKIE[CART_COOKIE])){
-    $cart_id = sanitize($_COOKIE[CART_COOKIE]);
-}
-if(!empty($cart_id)){
-    setcookie(CART_COOKIE, $cart_id, CART_COOKIE_EXPIRE, '/', '', false, true);
+if (isset($_COOKIE[LEGACY_CART_COOKIE])) {
+    $https = !empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off';
+    setcookie(LEGACY_CART_COOKIE, '', array(
+        'expires' => time() - 3600,
+        'path' => '/',
+        'secure' => $https,
+        'httponly' => true,
+        'samesite' => 'Lax'
+    ));
+    unset($_COOKIE[LEGACY_CART_COOKIE]);
 }
 
 $user_data = [];

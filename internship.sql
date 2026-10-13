@@ -83,6 +83,27 @@ CREATE TABLE IF NOT EXISTS `internships` (
   CONSTRAINT `internships_category_fk` FOREIGN KEY (`category_id`) REFERENCES `internship_categories` (`id`) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+CREATE TABLE IF NOT EXISTS `saved_internships` (
+  `user_id` int(10) unsigned NOT NULL,
+  `internship_id` int(10) unsigned NOT NULL,
+  `saved_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`user_id`,`internship_id`),
+  KEY `saved_internships_listing_index` (`internship_id`),
+  KEY `saved_internships_user_date_index` (`user_id`,`saved_at`),
+  CONSTRAINT `saved_internships_user_fk` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `saved_internships_listing_fk` FOREIGN KEY (`internship_id`) REFERENCES `internships` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS `recently_viewed_internships` (
+  `user_id` int(10) unsigned NOT NULL,
+  `internship_id` int(10) unsigned NOT NULL,
+  `viewed_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`user_id`,`internship_id`),
+  KEY `recently_viewed_user_date_index` (`user_id`,`viewed_at`),
+  CONSTRAINT `recently_viewed_user_fk` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `recently_viewed_listing_fk` FOREIGN KEY (`internship_id`) REFERENCES `internships` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
 CREATE TABLE IF NOT EXISTS `applications` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `cus_id` int(10) unsigned NOT NULL COMMENT 'Legacy column name; refers to users.id',

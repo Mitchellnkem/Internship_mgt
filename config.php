@@ -17,6 +17,4 @@ define('JOOBLE_API_KEY', getenv('JOOBLE_API_KEY') ?: '');
 define('MATRIX_HOMESERVER_URL', rtrim(getenv('MATRIX_HOMESERVER_URL') ?: '', '/'));
 define('MATRIX_SERVER_NAME', getenv('MATRIX_SERVER_NAME') ?: '');
 
-define('CART_COOKIE', 'Sum123Am1902intern');
-define('CART_COOKIE_EXPIRE', time() + (86400 * 30));
-define('TAXRATE', 0.18);
+define('LEGACY_CART_COOKIE', 'Sum123Am1902intern');

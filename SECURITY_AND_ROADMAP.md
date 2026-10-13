@@ -33,6 +33,10 @@ The internships page now includes a same-origin JSON search endpoint at `api/opp
 
 To enable live results, request a Jooble API key for the intended market and set `JOOBLE_API_KEY` in the Apache/PHP environment. Do not put the key in JavaScript or commit it. Then run `php scripts/setup_internship_schema.php` to create the cache table. Until the key is configured, local internship listings continue to work and the external section explains that live search is disconnected. Jooble documents a 500-request lifetime limit for its free API plan, so the cache is enabled from the start; confirm current market access, limits, and display terms with Jooble before launch.
 
+## Saved and recently viewed internships
+
+Student accounts can save up to twenty published local internships from the opportunity detail page and remove them from the saved list on `myaccount.php`. The save action is POST-only, CSRF-protected, role-checked, and scoped to the current active student. Guests keep up to ten recently viewed listing IDs in their PHP session; signed-in students keep up to twenty in `recently_viewed_internships`. These tables are included in `internship.sql`; run the schema setup script after pulling this change. External Jooble listings are not saved because applications/bookmarks belong on their original provider site.
+
 ## Secure messaging
 
 See [SECURE_MESSAGING_ARCHITECTURE.md](SECURE_MESSAGING_ARCHITECTURE.md) for the self-hosted Matrix end-to-end messaging design. Server endpoints now verify Matrix account ownership and ensure linked rooms use Matrix encryption and have only the student/employer attached to that application. The schema stores account/room references only. Message bodies and cryptographic keys remain on clients/Matrix. The project still needs a permanent homeserver domain, TLS endpoint, JavaScript SDK build, Matrix account enrollment, and key recovery/verification UI before users can message. Do not treat ordinary PHP/MySQL storage encryption or HTTPS alone as end-to-end encryption.

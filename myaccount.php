@@ -88,4 +88,8 @@ $applications = get_user_applications($_SESSION['SBUser']);
     </div>
 </div>
 
+<?php if (isset($user_data['user_type']) && $user_data['user_type'] === 'student'): ?>
+    <?php include 'widgets/saved_opportunities.php'; ?>
+<?php endif; ?>
+
 <?php include 'includes/footer.php'; ?>
