@@ -35,6 +35,19 @@ function has_index($db, $table, $index) {
     return $result && $result->num_rows > 0;
 }
 
+function has_saved_internship_unique_index($db) {
+    $result = $db->query("SHOW INDEX FROM `saved_internships` WHERE Non_unique = 0");
+    $indexes = array();
+    while ($row = $result->fetch_assoc()) {
+        $indexes[$row['Key_name']][(int)$row['Seq_in_index']] = $row['Column_name'];
+    }
+    foreach ($indexes as $columns) {
+        ksort($columns);
+        if (array_values($columns) === array('user_id', 'internship_id')) return true;
+    }
+    return false;
+}
+
 function has_foreign_key($db, $table, $name) {
     $statement = $db->prepare('SELECT 1 FROM information_schema.TABLE_CONSTRAINTS WHERE CONSTRAINT_SCHEMA = DATABASE() AND TABLE_NAME = ? AND CONSTRAINT_NAME = ? AND CONSTRAINT_TYPE = \'FOREIGN KEY\' LIMIT 1');
     $statement->bind_param('ss', $table, $name);
@@ -99,6 +112,16 @@ try {
         }
     } while ($db->more_results() && $db->next_result());
 
+    $savedInternshipUniqueAdded = true;
+    if (!has_saved_internship_unique_index($db)) {
+        $duplicates = $db->query('SELECT COUNT(*) AS total FROM (SELECT user_id, internship_id FROM saved_internships GROUP BY user_id, internship_id HAVING COUNT(*) > 1) d')->fetch_assoc();
+        if ((int)$duplicates['total'] === 0) {
+            $db->query('ALTER TABLE saved_internships ADD UNIQUE INDEX saved_internships_user_listing_unique (user_id, internship_id)');
+        } else {
+            $savedInternshipUniqueAdded = false;
+        }
+    }
+
     // Extend databases created by earlier versions without dropping user data.
     add_column_if_missing($db, 'users', 'account_status', "ENUM('active','pending','suspended','deactivated') NOT NULL DEFAULT 'active'");
     add_column_if_missing($db, 'users', 'email_verified_at', 'DATETIME DEFAULT NULL');
@@ -161,6 +184,7 @@ try {
     $historyForeignKeyAdded = add_foreign_key_if_safe($db, 'application_status_history', 'application_history_application_fk', 'application_id', 'applications', 'id', 'CASCADE');
 
     fwrite(STDOUT, "Core schema applied and existing tables upgraded without dropping rows.\n");
+    if (!$savedInternshipUniqueAdded) fwrite(STDOUT, "Warning: duplicate saved internships exist; resolve them before adding the unique user/listing constraint.\n");
     if (!$userForeignKeyAdded) fwrite(STDOUT, "Warning: applications refer to missing user records; the user foreign key was skipped.\n");
     if (!$listingForeignKeyAdded) fwrite(STDOUT, "Warning: applications refer to missing internship records; the internship foreign key was skipped to preserve application history.\n");
     if (!$historyForeignKeyAdded) fwrite(STDOUT, "Warning: status-history rows refer to missing applications; the history foreign key was skipped.\n");

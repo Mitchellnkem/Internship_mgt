@@ -35,13 +35,13 @@ $userId = (int)$_SESSION['SBUser'];
 $transactionOpen = false;
 try {
     if ($action === 'save') {
-        $available = $db->prepare("SELECT id FROM internships WHERE id = ? AND status = 'published' LIMIT 1");
+        $available = $db->prepare("SELECT id FROM internships WHERE id = ? AND status = 'published' AND (closing_at IS NULL OR closing_at > NOW()) LIMIT 1");
         $available->bind_param('i', $internshipId);
         $available->execute();
         $exists = $available->get_result()->num_rows > 0;
         $available->close();
         if (!$exists) {
-            flash('error_flash', 'This internship is no longer available to save.');
+            flash('error_flash', 'This internship is no longer available to save or its application deadline has passed.');
             redirect($redirectTarget);
         }
 
@@ -99,6 +99,10 @@ try {
     }
 } catch (mysqli_sql_exception $exception) {
     if ($transactionOpen) $db->rollback();
+    if ($action === 'save' && (int)$exception->getCode() === 1062) {
+        flash('success_flash', 'This internship is already in your saved list.');
+        redirect($redirectTarget);
+    }
     error_log('BIT-InternshipHub saved internship update failed: '.$exception->getMessage());
     flash('error_flash', 'Your saved list could not be updated. Please try again.');
 }
